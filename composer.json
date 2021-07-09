@@ -1,0 +1,55 @@
+{
+  "name": "pollen-solutions/asset",
+  "description": "Pollen Asset Component - Manage CSS styles, JS scripts, ...",
+  "homepage": "https://www.presstify.com/pollen-solutions/asset/",
+  "keywords": [
+    "presstify",
+    "plugins",
+    "asset"
+  ],
+  "time": "2021-07-09",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Jordy Manner",
+      "email": "jordy@presstify.com"
+    }
+  ],
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://composer.presstify.com/pollen-solutions/"
+    }
+  ],
+  "require": {
+    "php": "^7.4 || ^8.0",
+    "matthiasmullie/minify": "^1.3",
+    "pollen-solutions/event": "^1.0",
+    "pollen-solutions/http": "^1.0",
+    "pollen-solutions/support": "^1.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9.0",
+    "roave/security-advisories": "dev-latest"
+  },
+  "autoload": {
+    "psr-4": {
+      "Pollen\\Asset\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Pollen\\Asset\\Test\\": "tests"
+    }
+  },
+  "suggest": {
+    "pollen-solutions/container" : "Pollen Container Component - PSR-11 ready Dependencies Injection Container."
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "config": {
+    "optimize-autoloader": true,
+    "preferred-install": "dist",
+    "sort-packages": true
+  }
+}
