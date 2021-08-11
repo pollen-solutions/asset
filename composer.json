@@ -1,13 +1,13 @@
 {
   "name": "pollen-solutions/asset",
-  "description": "Pollen Asset Component - Manage CSS styles, JS scripts, ...",
+  "description": "Pollen Solutions - Asset Component - Manage CSS styles, JS scripts, ...",
   "homepage": "https://www.presstify.com/pollen-solutions/asset/",
   "keywords": [
-    "presstify",
-    "plugins",
+    "pollen-solutions",
+    "component",
     "asset"
   ],
-  "time": "2021-07-09",
+  "time": "2021-08-11",
   "license": "MIT",
   "authors": [
     {
@@ -38,7 +38,7 @@
     }
   },
   "suggest": {
-    "pollen-solutions/container" : "Pollen Container Component - PSR-11 ready Dependencies Injection Container."
+    "pollen-solutions/container" : "Pollen Solutions - Container Component - PSR-11 ready Dependencies Injection Container."
   },
   "minimum-stability": "dev",
   "prefer-stable": true,
