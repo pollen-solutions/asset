@@ -8,7 +8,7 @@ use Pollen\Container\ServiceProvider;
 
 class AssetServiceProvider extends ServiceProvider
 {
-    protected $provides = [
+    protected array $services = [
         AssetManagerInterface::class
     ];
 
@@ -17,8 +17,6 @@ class AssetServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->getContainer()->share(AssetManagerInterface::class, function () {
-            return new AssetManager([], $this->getContainer());
-        });
+        $this->getContainer()->add(AssetManagerInterface::class, AssetManager::class);
     }
 }
