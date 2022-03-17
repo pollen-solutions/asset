@@ -4,36 +4,44 @@ declare(strict_types=1);
 
 namespace Pollen\Asset\Queues;
 
-class HtmlQueue implements QueueInterface
+use Pollen\Asset\Types\TypeInterface;
+
+class BaseQueue implements QueueInterface
 {
+    /**
+     * High priority.
+     * @const int
+     */
     public const HIGH = 100;
 
+    /**
+     * Normal priority.
+     * @const int
+     */
     public const NORMAL = 0;
 
+    /**
+     * Low priority.
+     * @const int
+     */
     public const LOW = -100;
 
-    private ?string $name;
+    protected ?string $name;
 
-    protected string $html;
+    protected TypeInterface $type;
 
-    protected bool $inFooter = true;
+    protected bool $inFooter = false;
 
     protected int $priority;
 
     /**
-     * @param string $html
-     * @param bool $inFooter
+     * @param TypeInterface $type
      * @param int $priority
      * @param string|null $name
      */
-    public function __construct(
-        string $html,
-        bool $inFooter = false,
-        int $priority = self::NORMAL,
-        ?string $name = null
-    ) {
-        $this->html = $html;
-        $this->inFooter = $inFooter;
+    public function __construct(TypeInterface $type, int $priority = self::NORMAL, ?string $name = null)
+    {
+        $this->type = $type;
         $this->priority = $priority;
         $this->name = $name;
     }
@@ -44,7 +52,7 @@ class HtmlQueue implements QueueInterface
     public function getName(): string
     {
         if ($this->name === null) {
-            $this->name = sha1($this->html);
+            $this->name = sha1((string)$this->type);
         }
         return $this->name;
     }
@@ -58,7 +66,7 @@ class HtmlQueue implements QueueInterface
     }
 
     /**
-     * @return bool
+     * @inheritDoc
      */
     public function inFooter(): bool
     {
@@ -70,6 +78,8 @@ class HtmlQueue implements QueueInterface
      */
     public function render(): string
     {
-        return $this->html;
+        return $this->type->render();
     }
 }
+
+

@@ -4,25 +4,28 @@ declare(strict_types=1);
 
 namespace Pollen\Asset;
 
-use Pollen\Asset\Queues\CssAssetQueue;
+use Pollen\Asset\Queues\BaseQueue;
+use Pollen\Asset\Queues\CharsetQueue;
+use Pollen\Asset\Queues\CssQueue;
 use Pollen\Asset\Queues\HtmlQueue;
-use Pollen\Asset\Queues\JsAssetQueue;
-use Pollen\Asset\Queues\LinkTagQueue;
-use Pollen\Asset\Queues\MetaTagQueue;
-use Pollen\Asset\Queues\TitleTagQueue;
-use Pollen\Support\Proxy\ContainerProxyInterface;
+use Pollen\Asset\Queues\InlineCssQueue;
+use Pollen\Asset\Queues\InlineJsQueue;
+use Pollen\Asset\Queues\JsQueue;
+use Pollen\Asset\Queues\LinkQueue;
+use Pollen\Asset\Queues\MetaQueue;
+use Pollen\Asset\Queues\QueueInterface;
+use Pollen\Asset\Queues\TitleQueue;
+use Pollen\Asset\Types\TypeInterface;
 
-interface AssetManagerInterface extends ContainerProxyInterface
+interface AssetManagerInterface
 {
     /**
-     * Add a global JS variable.
-     *
      * @param string $key
-     * @param mixed $value
-     * @param boolean $inFooter
+     * @param $value
+     * @param bool $inFooter
      * @param string|null $namespace
      *
-     * @return static
+     * @return AssetManagerInterface
      */
     public function addGlobalJsVar(
         string $key,
@@ -32,252 +35,195 @@ interface AssetManagerInterface extends ContainerProxyInterface
     ): AssetManagerInterface;
 
     /**
-     * Add new instance of an asset.
-     *
-     * @param AssetInterface $asset
-     *
-     * @return static
-     */
-    public function addAsset(AssetInterface $asset): AssetManagerInterface;
-
-    /**
-     * Add inline CSS styles.
-     *
-     * @param string $css
-     *
-     * @return static
-     */
-    public function addInlineCss(string $css): AssetManagerInterface;
-
-    /**
-     *  Add inline Js scripts.
-     *
-     * @param string $js
-     * @param boolean $inFooter
-     *
-     * @return static
-     */
-    public function addInlineJs(string $js, bool $inFooter = false): AssetManagerInterface;
-
-    /**
-     * Get list of registered assets instances.
-     *
-     * @return AssetInterface[]|array
-     */
-    public function all(): array;
-
-    /**
-     * Remove an asset from queue.
-     *
-     * @return static
-     */
-    public function dequeue(string $name): AssetManagerInterface;
-
-    /**
-     * Add queue instance in queue.
-     *
      * @param QueueInterface $queue
+     *
+     * @return string
+     */
+    public function enqueue(QueueInterface $queue): string;
+
+    /**
+     * @param TypeInterface $type
+     * @param int $priority
      * @param string|null $name
      *
-     * @return static
+     * @return string
      */
-    public function enqueue(QueueInterface $queue, ?string $name = null): AssetManagerInterface;
+    public function enqueueType(TypeInterface $type, int $priority = BaseQueue::NORMAL, ?string $name = null): string;
 
     /**
-     * Add the meta tag charset encoding in queue.
-     *
      * @param string $charset
      * @param array $htmlAttrs
      * @param int $priority
      * @param string|null $queueName
      *
-     * @return QueueInterface
+     * @return string
      */
     public function enqueueCharset(
         string $charset = 'UTF-8',
         array $htmlAttrs = [],
-        int $priority = TitleTagQueue::NORMAL,
+        int $priority = CharsetQueue::NORMAL,
         ?string $queueName = null
-    ): QueueInterface;
+    ): string;
 
     /**
-     * Add a registered asset in CSS queue.
-     *
-     * @param AssetInterface $asset
+     * @param string $title
      * @param array $htmlAttrs
      * @param int $priority
      * @param string|null $queueName
      *
-     * @return AssetQueueInterface
+     * @return string
      */
-    public function enqueueCss(
-        AssetInterface $asset,
+    public function enqueueTitle(
+        string $title,
         array $htmlAttrs = [],
-        int $priority = CssAssetQueue::NORMAL,
+        int $priority = TitleQueue::NORMAL,
         ?string $queueName = null
-    ): AssetQueueInterface;
+    ): string;
 
     /**
-     * Add HTML contents in queue.
+     * @param string $rel
+     * @param string|null $href
+     * @param array $htmlAttrs
+     * @param int $priority
+     * @param string|null $queueName
      *
+     * @return string
+     */
+    public function enqueueLink(
+        string $rel,
+        ?string $href = null,
+        array $htmlAttrs = [],
+        int $priority = LinkQueue::NORMAL,
+        ?string $queueName = null
+    ): string;
+
+    /**
+     * @param string|null $name
+     * @param string|null $content
+     * @param array $htmlAttrs
+     * @param int $priority
+     * @param string|null $queueName
+     *
+     * @return string
+     */
+    public function enqueueMeta(
+        ?string $name = null,
+        ?string $content = null,
+        array $htmlAttrs = [],
+        int $priority = MetaQueue::NORMAL,
+        ?string $queueName = null
+    ): string;
+
+    /**
+     * @param string $path
+     * @param array $htmlAttrs
+     * @param int $priority
+     * @param string|null $queueName
+     *
+     * @return string
+     */
+    public function enqueueCss(
+        string $path,
+        array $htmlAttrs = [],
+        int $priority = CssQueue::NORMAL,
+        ?string $queueName = null
+    ): string;
+
+    /**
+     * @param string $css
+     * @param array $htmlAttrs
+     * @param int $priority
+     * @param string|null $queueName
+     *
+     * @return string
+     */
+    public function enqueueInlineCss(
+        string $css,
+        array $htmlAttrs = [],
+        int $priority = InlineCssQueue::NORMAL,
+        ?string $queueName = null
+    ): string;
+
+    /**
+     * @param string $path
+     * @param array $htmlAttrs
+     * @param bool $inFooter
+     * @param int $priority
+     * @param string|null $queueName
+     *
+     * @return string
+     */
+    public function enqueueJs(
+        string $path,
+        array $htmlAttrs = [],
+        bool $inFooter = false,
+        int $priority = JsQueue::NORMAL,
+        ?string $queueName = null
+    ): string;
+
+    /**
+     * @param string $js
+     * @param array $htmlAttrs
+     * @param bool $inFooter
+     * @param int $priority
+     * @param string|null $queueName
+     *
+     * @return string
+     */
+    public function enqueueInlineJs(
+        string $js,
+        array $htmlAttrs = [],
+        bool $inFooter = false,
+        int $priority = InlineJsQueue::NORMAL,
+        ?string $queueName = null
+    ): string;
+
+    /**
      * @param string $html
      * @param bool $inFooter
      * @param int $priority
      * @param string|null $queueName
      *
-     * @return QueueInterface
+     * @return string
      */
     public function enqueueHtml(
         string $html,
         bool $inFooter = false,
         int $priority = HtmlQueue::NORMAL,
         ?string $queueName = null
-    ): QueueInterface;
+    ): string;
 
     /**
-     * Add a registered asset in JS queue.
-     *
-     * @param AssetInterface $asset
-     * @param bool $inFooter
-     * @param array $htmlAttrs
-     * @param int $priority
-     * @param string|null $queueName
-     *
-     * @return AssetQueueInterface
-     */
-    public function enqueueJs(
-        AssetInterface $asset,
-        bool $inFooter = false,
-        array $htmlAttrs = [],
-        int $priority = JsAssetQueue::NORMAL,
-        ?string $queueName = null
-    ): AssetQueueInterface;
-
-    /**
-     * Add a link tag in queue.
-     *
-     * @param string $rel
-     * @param string $href
-     * @param array $htmlAttrs
-     * @param int $priority
-     * @param string|null $queueName
-     *
-     * @return QueueInterface
-     */
-    public function enqueueLink(
-        string $rel,
-        string $href,
-        array $htmlAttrs = [],
-        int $priority = LinkTagQueue::NORMAL,
-        ?string $queueName = null
-    ): QueueInterface;
-
-    /**
-     * Add a meta tag in queue.
-     *
-     * @param string $name
-     * @param string $content
-     * @param array $htmlAttrs
-     * @param int $priority
-     * @param string|null $queueName
-     *
-     * @return QueueInterface
-     */
-    public function enqueueMeta(
-        string $name,
-        string $content,
-        array $htmlAttrs = [],
-        int $priority = MetaTagQueue::NORMAL,
-        ?string $queueName = null
-    ): QueueInterface;
-
-    /**
-     * Add the meta tag title in queue.
-     *
-     * @param string $title
-     * @param array $htmlAttrs
-     * @param int $priority
-     * @param string|null $queueName
-     *
-     * @return QueueInterface
-     */
-    public function enqueueTitle(
-        string $title,
-        array $htmlAttrs = [],
-        int $priority = TitleTagQueue::NORMAL,
-        ?string $queueName = null
-    ): QueueInterface;
-
-    /**
-     * Get an registered asset instance.
-     *
-     * @param string $name
-     *
-     * @return AssetInterface|null
-     */
-    public function get(string $name): ?AssetInterface;
-
-    /**
-     * Get base path of assets.
-     *
-     * @return string|null
-     */
-    public function getBasePath(): ?string;
-
-    /**
-     * Get base url of assets.
-     *
-     * @return string|null
-     */
-    public function getBaseUrl(): ?string;
-
-    /**
-     * Get HTML footer.
-     *
-     * @return string
-     */
-    public function getFooter(): string;
-
-    /**
-     * Get HTML head.
-     *
      * @return string
      */
     public function getHead(): string;
 
     /**
-     * Check if registered asset exists.
-     *
-     * @param string|null $name
-     *
-     * @return bool
+     * @return string
      */
-    public function has(?string $name = null): bool;
+    public function getFooter(): string;
 
     /**
-     * Set base directory of assets.
-     *
+     * @return string|null
+     */
+    public function getBasePath(): ?string;
+
+    /**
      * @param string $basePath
      *
-     * @return static
+     * @return AssetManagerInterface
      */
     public function setBasePath(string $basePath): AssetManagerInterface;
 
     /**
-     * Set base url of assets.
-     *
-     * @param string $baseUrl
-     *
-     * @return static
+     * @return string|null
      */
-    public function setBaseUrl(string $baseUrl): AssetManagerInterface;
+    public function getBaseUrl(): ?string;
 
     /**
-     * Remove registered asset.
+     * @param string $baseUrl
      *
-     * @param string $name
-     *
-     * @return static
+     * @return AssetManagerInterface
      */
-    public function remove(string $name): AssetManagerInterface;
+    public function setBaseUrl(string $baseUrl): AssetManagerInterface;
 }
