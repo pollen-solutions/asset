@@ -9,7 +9,7 @@ use Pollen\Support\Filesystem as fs;
 use RuntimeException;
 use SplFileInfo;
 
-class ViteManifestLoader extends ManifestLoader
+class ViteBuildManifestLoader extends ManifestLoader
 {
     /**
      * @return void
