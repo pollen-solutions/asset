@@ -32,7 +32,6 @@ class Loader implements LoaderInterface
         $this->loadCallback = $loadCallback;
 
         $this->preload();
-        $this->load();
     }
 
     /**
