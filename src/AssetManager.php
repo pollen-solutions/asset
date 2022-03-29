@@ -301,8 +301,6 @@ class AssetManager implements AssetManagerInterface
                 $this->enqueueInlineJs($inlineJs, [], false, InlineJsQueue::NORMAL + 1, '_head-inline-js');
             }
 
-            // $this->event()->trigger('asset.handle-head.collect', [$this]);
-
             $queueCollection = (new Collection($this->enqueued))
                 ->filter(
                     function (QueueInterface $queue) {
@@ -320,7 +318,6 @@ class AssetManager implements AssetManagerInterface
              * @var QueueInterface $queue
              */
             foreach ($queueCollection as /* $name => */ $queue) {
-                // $this->event()->trigger('asset.handle-head.queue', [$name, $queue, $this]);
                 $this->headQueue[$queue->getName()] = $queue;
             }
 
@@ -348,9 +345,6 @@ class AssetManager implements AssetManagerInterface
                 $this->enqueueInlineJs($inlineJs, [], true, JsQueue::NORMAL + 1, '_footer-inline-js');
             }
 
-            // $this->event()->trigger('asset.handle-footer.collect', [$this]);
-
-
             $queueCollection = (new Collection($this->enqueued))
                 ->filter(
                     function (QueueInterface $queue) {
@@ -368,7 +362,6 @@ class AssetManager implements AssetManagerInterface
              * @var QueueInterface $queue
              */
             foreach ($queueCollection as /*$name =>*/ $queue) {
-                // $this->event()->trigger('asset.handle-footer.queue', [$name, $queue, $this]);
                 $this->footerQueue[] = $queue;
             }
 

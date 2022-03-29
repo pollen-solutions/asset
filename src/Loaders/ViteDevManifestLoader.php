@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 namespace Pollen\Asset\Loaders;
 
-use Exception;
 use GuzzleHttp\Client as HttpClient;
+use GuzzleHttp\Exception\GuzzleException;
 use JsonException;
 use Pollen\Asset\Types\TagJsType;
-use Pollen\Support\Filesystem as fs;
 use RuntimeException;
-use SplFileInfo;
 
 class ViteDevManifestLoader extends ManifestLoader
 {
@@ -24,8 +22,6 @@ class ViteDevManifestLoader extends ManifestLoader
 
             try {
                 $entries = json_decode($manifestContent, true, 512, JSON_THROW_ON_ERROR);
-                $baseDir = $this->getBaseDir();
-
 
                 if (!empty($entries['url']['network'])) {
                     $baseUrl = current($entries['url']['network']);
@@ -42,7 +38,7 @@ class ViteDevManifestLoader extends ManifestLoader
                         $this->preloaded[] = new TagJsType("$baseUrl/@vite/client", ['type' => 'module', 'defer']);
                         $this->preloaded[] = new TagJsType("$baseUrl/app.js", ['type' => 'module', 'defer']);
                     }
-                } catch (Exception $e) {
+                } catch (GuzzleException $e) {
                     unset($e);
                 }
             } catch (JsonException $e) {
