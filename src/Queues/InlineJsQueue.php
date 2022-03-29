@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pollen\Asset\Queues;
 
-use JetBrains\PhpStorm\Pure;
 use Pollen\Asset\Types\InlineJsType;
 
 class InlineJsQueue extends BaseQueue
