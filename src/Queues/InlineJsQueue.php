@@ -6,7 +6,7 @@ namespace Pollen\Asset\Queues;
 
 use Pollen\Asset\Types\InlineJsType;
 
-class InlineJsQueue extends BaseQueue
+class InlineJsQueue extends BaseInFooterQueue
 {
     public const NORMAL = 55;
 
@@ -22,8 +22,6 @@ class InlineJsQueue extends BaseQueue
         int $priority = self::NORMAL,
         ?string $name = null
     ) {
-        $this->inFooter = $inFooter;
-
-        parent::__construct($type, $priority, $name);
+        parent::__construct($type, $inFooter, $priority, $name);
     }
 }

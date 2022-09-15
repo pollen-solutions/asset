@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Pollen\Asset\Queues;
 
+use Pollen\Asset\Types\TypeInterface;
+
 interface QueueInterface
 {
     /**
@@ -17,9 +19,9 @@ interface QueueInterface
     public function getPriority(): int;
 
     /**
-     * @return bool
+     * @return TypeInterface
      */
-    public function inFooter(): bool;
+    public function getType(): TypeInterface;
 
     /**
      * @return string

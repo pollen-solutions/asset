@@ -6,7 +6,7 @@ namespace Pollen\Asset\Types;
 
 use Pollen\Support\Html;
 
-abstract class AbstractType implements TypeInterface
+abstract class AbstractType implements HtmlAttrsTypeInterface, TypeInterface
 {
     protected array $htmlAttrs = [];
 
