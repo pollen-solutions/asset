@@ -6,7 +6,7 @@ namespace Pollen\Asset\Queues;
 
 use Pollen\Asset\Types\TagJsType;
 
-class JsQueue extends BaseQueue
+class JsQueue extends BaseInFooterQueue
 {
     public const NORMAL = 60;
 
@@ -22,8 +22,6 @@ class JsQueue extends BaseQueue
         int $priority = self::NORMAL,
         ?string $name = null
     ) {
-        $this->inFooter = $inFooter;
-
-        parent::__construct($type, $priority, $name);
+        parent::__construct($type, $inFooter, $priority, $name);
     }
 }

@@ -35,6 +35,18 @@ interface AssetManagerInterface
     ): AssetManagerInterface;
 
     /**
+     * @return array<string, AssetInterface>|array
+     */
+    public function all(): array;
+
+    /**
+     * @param string $handleName
+     *
+     * @return AssetInterface|null
+     */
+    public function get(string $handleName): ?AssetInterface;
+
+    /**
      * @param QueueInterface $queue
      *
      * @return string
@@ -54,7 +66,7 @@ interface AssetManagerInterface
      * @param string $charset
      * @param array $htmlAttrs
      * @param int $priority
-     * @param string|null $queueName
+     * @param string|null $handleName
      *
      * @return string
      */
@@ -62,14 +74,14 @@ interface AssetManagerInterface
         string $charset = 'UTF-8',
         array $htmlAttrs = [],
         int $priority = CharsetQueue::NORMAL,
-        ?string $queueName = null
+        ?string $handleName = null
     ): string;
 
     /**
      * @param string $title
      * @param array $htmlAttrs
      * @param int $priority
-     * @param string|null $queueName
+     * @param string|null $handleName
      *
      * @return string
      */
@@ -77,7 +89,7 @@ interface AssetManagerInterface
         string $title,
         array $htmlAttrs = [],
         int $priority = TitleQueue::NORMAL,
-        ?string $queueName = null
+        ?string $handleName = null
     ): string;
 
     /**
@@ -85,7 +97,7 @@ interface AssetManagerInterface
      * @param string|null $href
      * @param array $htmlAttrs
      * @param int $priority
-     * @param string|null $queueName
+     * @param string|null $handleName
      *
      * @return string
      */
@@ -94,7 +106,7 @@ interface AssetManagerInterface
         ?string $href = null,
         array $htmlAttrs = [],
         int $priority = LinkQueue::NORMAL,
-        ?string $queueName = null
+        ?string $handleName = null
     ): string;
 
     /**
@@ -102,7 +114,7 @@ interface AssetManagerInterface
      * @param string|null $content
      * @param array $htmlAttrs
      * @param int $priority
-     * @param string|null $queueName
+     * @param string|null $handleName
      *
      * @return string
      */
@@ -111,14 +123,14 @@ interface AssetManagerInterface
         ?string $content = null,
         array $htmlAttrs = [],
         int $priority = MetaQueue::NORMAL,
-        ?string $queueName = null
+        ?string $handleName = null
     ): string;
 
     /**
      * @param string $path
      * @param array $htmlAttrs
      * @param int $priority
-     * @param string|null $queueName
+     * @param string|null $handleName
      *
      * @return string
      */
@@ -126,14 +138,14 @@ interface AssetManagerInterface
         string $path,
         array $htmlAttrs = [],
         int $priority = CssQueue::NORMAL,
-        ?string $queueName = null
+        ?string $handleName = null
     ): string;
 
     /**
      * @param string $css
      * @param array $htmlAttrs
      * @param int $priority
-     * @param string|null $queueName
+     * @param string|null $handleName
      *
      * @return string
      */
@@ -141,7 +153,7 @@ interface AssetManagerInterface
         string $css,
         array $htmlAttrs = [],
         int $priority = InlineCssQueue::NORMAL,
-        ?string $queueName = null
+        ?string $handleName = null
     ): string;
 
     /**
@@ -149,7 +161,7 @@ interface AssetManagerInterface
      * @param array $htmlAttrs
      * @param bool $inFooter
      * @param int $priority
-     * @param string|null $queueName
+     * @param string|null $handleName
      *
      * @return string
      */
@@ -158,7 +170,7 @@ interface AssetManagerInterface
         array $htmlAttrs = [],
         bool $inFooter = false,
         int $priority = JsQueue::NORMAL,
-        ?string $queueName = null
+        ?string $handleName = null
     ): string;
 
     /**
@@ -166,7 +178,7 @@ interface AssetManagerInterface
      * @param array $htmlAttrs
      * @param bool $inFooter
      * @param int $priority
-     * @param string|null $queueName
+     * @param string|null $handleName
      *
      * @return string
      */
@@ -175,14 +187,14 @@ interface AssetManagerInterface
         array $htmlAttrs = [],
         bool $inFooter = false,
         int $priority = InlineJsQueue::NORMAL,
-        ?string $queueName = null
+        ?string $handleName = null
     ): string;
 
     /**
      * @param string $html
      * @param bool $inFooter
      * @param int $priority
-     * @param string|null $queueName
+     * @param string|null $handleName
      *
      * @return string
      */
@@ -190,8 +202,63 @@ interface AssetManagerInterface
         string $html,
         bool $inFooter = false,
         int $priority = HtmlQueue::NORMAL,
-        ?string $queueName = null
+        ?string $handleName = null
     ): string;
+
+    /**
+     * @param string $handleName
+     *
+     * @return string
+     */
+    public function enqueueRegistered(string $handleName): string;
+
+    /**
+     * @param string $handleName
+     * @param TypeInterface $type
+     * @param ...$args
+     *
+     * @return AssetInterface
+     */
+    public function register(string $handleName, TypeInterface $type, ...$args): AssetInterface;
+
+    /**
+     * @param string $handleName
+     *
+     * @return AssetInterface
+     */
+    public function deregister(string $handleName): AssetInterface;
+
+    /**
+     * @param string $handleName
+     * @param string $path
+     * @param array $htmlAttrs
+     * @param int $priority
+     *
+     * @return AssetInterface
+     */
+    public function registerCss(
+        string $handleName,
+        string $path,
+        array $htmlAttrs = [],
+        int $priority = CssQueue::NORMAL
+    ): AssetInterface;
+
+    /**
+     * @param string $handleName
+     * @param string $path
+     * @param array $htmlAttrs
+     * @param bool $inFooter
+     * @param int $priority
+     *
+     * @return AssetInterface
+     */
+    public function registerJs(
+        string $handleName,
+        string $path,
+        array $htmlAttrs = [],
+        bool $inFooter = false,
+        int $priority = JsQueue::NORMAL
+    ): AssetInterface;
 
     /**
      * @return string

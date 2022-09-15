@@ -30,8 +30,6 @@ class BaseQueue implements QueueInterface
 
     protected TypeInterface $type;
 
-    protected bool $inFooter = false;
-
     protected int $priority;
 
     /**
@@ -52,7 +50,7 @@ class BaseQueue implements QueueInterface
     public function getName(): string
     {
         if ($this->name === null) {
-            $this->name = sha1((string)$this->type);
+            $this->name = sha1((string)spl_object_id($this->type));
         }
         return $this->name;
     }
@@ -68,9 +66,9 @@ class BaseQueue implements QueueInterface
     /**
      * @inheritDoc
      */
-    public function inFooter(): bool
+    public function getType(): TypeInterface
     {
-        return $this->inFooter;
+        return $this->type;
     }
 
     /**

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Asset\Loaders;
+namespace Pollen\Asset\Dispatchers;
 
+use Pollen\Asset\Types\StaticType;
 use Pollen\Asset\Types\TagCssType;
 use Pollen\Asset\Types\TagJsType;
-use Pollen\Asset\Types\TypeInterface;
 use Pollen\Support\Filesystem as fs;
 use SplFileInfo;
 
@@ -39,29 +39,42 @@ class LocalFileTypeDispatcher
     }
 
     /**
-     * @return TypeInterface|null
+     * @return array
      */
-    public function dispatch(): ?TypeInterface
+    public function dispatch(): array
     {
         $path = $this->file->getFilename();
 
         if ($this->baseDir) {
-            $path = preg_replace('#^' . preg_quote($this->baseDir, fs::DS) . '#', '', $this->file->getPath()) . $path;
+            $path = rtrim(
+                    preg_replace('#^' . preg_quote($this->baseDir, fs::DS) . '#', '', $this->file->getPath()), '/'
+                ) . "/$path";
         }
+
         if ($this->basePath) {
             $path = rtrim($this->basePath, '/') . "/$path";
         }
+
         if ($this->baseUrl) {
             $path = rtrim($this->baseUrl, '/') . '/' . ltrim($path, '/');
         }
 
-        switch ($this->file->getExtension()) {
+        $ext = $this->file->getExtension();
+
+        $output = compact('ext', 'path');
+
+        switch ($ext) {
             case 'css' :
-                return new TagCssType($path);
+                $output['type'] = new TagCssType($path);
+                break;
             case 'js':
-                return new TagJsType($path);
+                $output['type'] = new TagJsType($path);
+                break;
             default:
-                return null;
+                $output['type'] = new StaticType($path);
+                break;
         }
+
+        return $output;
     }
 }

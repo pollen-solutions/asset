@@ -14,6 +14,7 @@ use Pollen\Asset\Queues\BaseQueue;
 use Pollen\Asset\Queues\CharsetQueue;
 use Pollen\Asset\Queues\CssQueue;
 use Pollen\Asset\Queues\HtmlQueue;
+use Pollen\Asset\Queues\InFooterQueueInterface;
 use Pollen\Asset\Queues\InlineCssQueue;
 use Pollen\Asset\Queues\InlineJsQueue;
 use Pollen\Asset\Queues\JsQueue;
@@ -21,6 +22,7 @@ use Pollen\Asset\Queues\LinkQueue;
 use Pollen\Asset\Queues\MetaQueue;
 use Pollen\Asset\Queues\QueueInterface;
 use Pollen\Asset\Queues\TitleQueue;
+use Pollen\Asset\Types\HtmlType;
 use Pollen\Asset\Types\InlineCssType;
 use Pollen\Asset\Types\InlineJsType;
 use Pollen\Asset\Types\InlineTitleType;
@@ -89,14 +91,20 @@ class AssetManager implements AssetManagerInterface
     protected array $inlineCss = [];
 
     /**
+     * List of registered assets.
+     * @var array<string, QueueInterface>|array
+     */
+    protected array $registered = [];
+
+    /**
      * List of queued assets.
-     * @var array
+     * @var array<string|int, QueueInterface>|array
      */
     protected array $enqueued = [];
 
     /**
      * List of asset render in HTML head queue.
-     * @var array<string, string>|null
+     * @var array<string, QueueInterface>|null
      */
     private ?array $headQueue = null;
 
@@ -304,7 +312,7 @@ class AssetManager implements AssetManagerInterface
             $queueCollection = (new Collection($this->enqueued))
                 ->filter(
                     function (QueueInterface $queue) {
-                        return !$queue->inFooter();
+                        return !$queue instanceof InFooterQueueInterface || !$queue->inFooter();
                     }
                 )
                 ->sortByDesc(
@@ -313,11 +321,8 @@ class AssetManager implements AssetManagerInterface
                     }
                 );
 
-            /**
-             * @var string $name
-             * @var QueueInterface $queue
-             */
-            foreach ($queueCollection as /* $name => */ $queue) {
+            /** @var QueueInterface $queue */
+            foreach ($queueCollection as $queue) {
                 $this->headQueue[$queue->getName()] = $queue;
             }
 
@@ -348,7 +353,7 @@ class AssetManager implements AssetManagerInterface
             $queueCollection = (new Collection($this->enqueued))
                 ->filter(
                     function (QueueInterface $queue) {
-                        return $queue->inFooter();
+                        return $queue instanceof InFooterQueueInterface ? $queue->inFooter() : false;
                     }
                 )
                 ->sortByDesc(
@@ -395,6 +400,25 @@ class AssetManager implements AssetManagerInterface
     /**
      * @inheritDoc
      */
+    public function all(): array
+    {
+       return $this->registered;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function get(string $handleName): ?AssetInterface
+    {
+        if (!$registered = $this->registered[$handleName] ?? null) {
+            return null;
+        }
+        return $registered;
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function enqueue(QueueInterface $queue): string
     {
         $this->enqueued[$queue->getName()] = $queue;
@@ -419,12 +443,12 @@ class AssetManager implements AssetManagerInterface
         string $charset = 'UTF-8',
         array $htmlAttrs = [],
         int $priority = CharsetQueue::NORMAL,
-        ?string $queueName = null
+        ?string $handleName = null
     ): string {
         return $this->enqueue(
             new CharsetQueue(
                 new MetaTagType(array_merge($htmlAttrs + ['charset' => $charset])), $priority,
-                $queueName ?? '_charset'
+                $handleName ?? '_charset'
             )
         );
     }
@@ -436,10 +460,10 @@ class AssetManager implements AssetManagerInterface
         string $title,
         array $htmlAttrs = [],
         int $priority = TitleQueue::NORMAL,
-        ?string $queueName = null
+        ?string $handleName = null
     ): string {
         return $this->enqueue(
-            new TitleQueue(new InlineTitleType($title, $htmlAttrs), $priority, $queueName ?? '_title')
+            new TitleQueue(new InlineTitleType($title, $htmlAttrs), $priority, $handleName ?? '_title')
         );
     }
 
@@ -451,12 +475,12 @@ class AssetManager implements AssetManagerInterface
         ?string $href = null,
         array $htmlAttrs = [],
         int $priority = LinkQueue::NORMAL,
-        ?string $queueName = null
+        ?string $handleName = null
     ): string {
         if ($href !== null) {
             $htmlAttrs['href'] = $href;
         }
-        return $this->enqueue(new LinkQueue(new TagLinkType($rel, $htmlAttrs), $priority, $queueName));
+        return $this->enqueue(new LinkQueue(new TagLinkType($rel, $htmlAttrs), $priority, $handleName));
     }
 
     /**
@@ -467,7 +491,7 @@ class AssetManager implements AssetManagerInterface
         ?string $content = null,
         array $htmlAttrs = [],
         int $priority = MetaQueue::NORMAL,
-        ?string $queueName = null
+        ?string $handleName = null
     ): string {
         if ($name !== null) {
             $htmlAttrs['name'] = $name;
@@ -475,7 +499,7 @@ class AssetManager implements AssetManagerInterface
         if ($content !== null) {
             $htmlAttrs['content'] = $content;
         }
-        return $this->enqueue(new MetaQueue(new MetaTagType($htmlAttrs), $priority, $queueName));
+        return $this->enqueue(new MetaQueue(new MetaTagType($htmlAttrs), $priority, $handleName));
     }
 
     /**
@@ -485,9 +509,9 @@ class AssetManager implements AssetManagerInterface
         string $path,
         array $htmlAttrs = [],
         int $priority = CssQueue::NORMAL,
-        ?string $queueName = null
+        ?string $handleName = null
     ): string {
-        return $this->enqueue(new CssQueue(new TagCssType($path, $htmlAttrs), $priority, $queueName));
+        return $this->enqueue(new CssQueue(new TagCssType($path, $htmlAttrs), $priority, $handleName));
     }
 
     /**
@@ -497,9 +521,9 @@ class AssetManager implements AssetManagerInterface
         string $css,
         array $htmlAttrs = [],
         int $priority = InlineCssQueue::NORMAL,
-        ?string $queueName = null
+        ?string $handleName = null
     ): string {
-        return $this->enqueue(new InlineCssQueue(new InlineCssType($css, $htmlAttrs), $priority, $queueName));
+        return $this->enqueue(new InlineCssQueue(new InlineCssType($css, $htmlAttrs), $priority, $handleName));
     }
 
     /**
@@ -510,9 +534,9 @@ class AssetManager implements AssetManagerInterface
         array $htmlAttrs = [],
         bool $inFooter = false,
         int $priority = JsQueue::NORMAL,
-        ?string $queueName = null
+        ?string $handleName = null
     ): string {
-        return $this->enqueue(new JsQueue(new TagJsType($path, $htmlAttrs), $inFooter, $priority, $queueName));
+        return $this->enqueue(new JsQueue(new TagJsType($path, $htmlAttrs), $inFooter, $priority, $handleName));
     }
 
     /**
@@ -523,9 +547,9 @@ class AssetManager implements AssetManagerInterface
         array $htmlAttrs = [],
         bool $inFooter = false,
         int $priority = InlineJsQueue::NORMAL,
-        ?string $queueName = null
+        ?string $handleName = null
     ): string {
-        return $this->enqueue(new InlineJsQueue(new InlineJsType($js, $htmlAttrs), $inFooter, $priority, $queueName));
+        return $this->enqueue(new InlineJsQueue(new InlineJsType($js, $htmlAttrs), $inFooter, $priority, $handleName));
     }
 
     /**
@@ -535,9 +559,115 @@ class AssetManager implements AssetManagerInterface
         string $html,
         bool $inFooter = false,
         int $priority = HtmlQueue::NORMAL,
-        ?string $queueName = null
+        ?string $handleName = null
     ): string {
-        return $this->enqueue(new HtmlQueue($html, $inFooter, $priority, $queueName));
+        return $this->enqueue(new HtmlQueue(new HtmlType($html), $inFooter, $priority, $handleName));
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function enqueueRegistered(string $handleName): string
+    {
+        if (!$registered = $this->registered[$handleName] ?? null) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    'Registered assets with handle name [%s] do not exists. Please register it before.',
+                    $handleName
+                )
+            );
+        }
+
+        $type = $registered->getType();
+
+        switch (true) {
+            case $type instanceof HtmlType:
+                $queue = new HtmlQueue($type, ...$registered->getArgs());
+                break;
+            case $type instanceof InlineCssType:
+                $queue = new InlineCssQueue($type, ...$registered->getArgs());
+                break;
+            case $type instanceof InlineJsType:
+                $queue = new InlineJsQueue($type, ...$registered->getArgs());
+                break;
+            case $type instanceof InlineTitleType:
+                $queue = new TitleQueue($type, ...$registered->getArgs());
+                break;
+            case $type instanceof MetaTagType:
+                $queue = new MetaQueue($type, ...$registered->getArgs());
+                break;
+            case $type instanceof TagCssType:
+                $queue = new CssQueue($type, ...$registered->getArgs());
+                break;
+            case $type instanceof TagJsType:
+                $queue = new JsQueue($type, ...$registered->getArgs());
+                break;
+            case $type instanceof TagLinkType:
+                $queue = new LinkQueue($type, ...$registered->getArgs());
+                break;
+        }
+
+        if (!isset($queue)) {
+            $queue = new BaseQueue($type, ...$registered->getArgs());
+        }
+
+        return $this->enqueue($queue);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function register(string $handleName, TypeInterface $type, ...$args): AssetInterface
+    {
+        if (isset($this->registered[$handleName])) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    'Another registered assets with handle name [%s] already exists. Please deregister it before.',
+                    $handleName
+                )
+            );
+        }
+
+        return $this->registered[$handleName] = new Asset($handleName, $type, ...$args);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function registerCss(
+        string $handleName,
+        string $path,
+        array $htmlAttrs = [],
+        int $priority = CssQueue::NORMAL
+    ): AssetInterface {
+        return $this->register($handleName, new TagCssType($path, $htmlAttrs), $priority);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function registerJs(
+        string $handleName,
+        string $path,
+        array $htmlAttrs = [],
+        bool $inFooter = false,
+        int $priority = JsQueue::NORMAL
+    ): AssetInterface {
+        return $this->register($handleName, new TagJsType($path, $htmlAttrs), $inFooter, $priority);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function deregister(string $handleName): AssetInterface
+    {
+        $registered = $this->registered[$handleName];
+
+        if ($registered) {
+            unset($this->registered[$handleName]);
+        }
+
+        return $registered;
     }
 
     /**
