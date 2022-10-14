@@ -14,7 +14,7 @@ class InlineJsType extends AbstractInlineType
     public function render(): string
     {
         $this->htmlAttrs['type'] = 'text/javascript';
-        $this->content = '/* <![CDATA[ */{$this->content}/* ]]> */';
+        $this->content = "/* <![CDATA[ */$this->content/* ]]> */";
 
         return parent::render();
     }
