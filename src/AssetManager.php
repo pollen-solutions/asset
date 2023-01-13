@@ -251,7 +251,7 @@ class AssetManager implements AssetManagerInterface
 
         foreach ($this->headGlobalJsVars as $key => $vars) {
             $this->headJsVarsNames[] = $key;
-            $concatJs .= "let $key=" . $this->normalizeVars($vars) . ";";
+            $concatJs .= "var $key=" . $this->normalizeVars($vars) . ";";
         }
 
         foreach ($this->headInlineJs as $inlineJs) {
